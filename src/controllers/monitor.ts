@@ -6,11 +6,11 @@ export class Monitor {
     monitorId: string;
     monitorName: string;
     description?: string;
-  }): Promise<() => void> {
+  }): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel>> {
     const { monitorId, monitorName, description } = await Joi.object({
-      monitorId: Joi.string().alphanum().min(2).max(16).required(),
+      monitorId: Joi.string().alphanum().min(2).max(32).required(),
       monitorName: Joi.string().min(2).max(16).required(),
-      description: Joi.string().min(2).max(16).required(),
+      description: Joi.string().min(2).max(64).optional(),
     }).validateAsync(props);
     const monitor = await $$$(Monitor.getMonitor(monitorId));
     if (monitor) throw RESULT.ALREADY_EXISTS_MONITOR_NAME();
@@ -27,9 +27,9 @@ export class Monitor {
       monitorName: string;
       description?: string;
     }
-  ): Promise<() => void> {
+  ): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel>> {
     const { monitorId, monitorName, description } = await Joi.object({
-      monitorId: Joi.string().alphanum().min(2).max(16).optional(),
+      monitorId: Joi.string().alphanum().min(2).max(32).optional(),
       monitorName: Joi.string().min(2).max(16).optional(),
       description: Joi.string().min(2).max(16).optional(),
     }).validateAsync(props);
@@ -55,7 +55,7 @@ export class Monitor {
     const where: Prisma.MonitorModelWhereInput = {};
     const { take, skip, orderByField, orderBySort, search } = await Joi.object({
       take: Joi.number().default(10).optional(),
-      skip: Joi.number().default(10).optional(),
+      skip: Joi.number().default(0).optional(),
       orderByField: Joi.string()
         .valid('monitorId', 'monitorName', 'createdAt', 'updatedAt')
         .default('createdAt')
@@ -94,13 +94,10 @@ export class Monitor {
     return monitor;
   }
 
-  public static async deleteMonitor(monitor: MonitorModel): Promise<void> {
+  public static async deleteMonitor(
+    monitor: MonitorModel
+  ): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel>> {
     const { monitorId } = monitor;
-    await prisma.$transaction([
-      prisma.alarmModel.deleteMany({ where: { monitorId } }),
-      prisma.metricsModel.deleteMany({ where: { monitorId } }),
-      prisma.ruleModel.deleteMany({ where: { monitorId } }),
-      prisma.monitorModel.deleteMany({ where: { monitorId } }),
-    ]);
+    return () => prisma.monitorModel.delete({ where: { monitorId } });
   }
 }

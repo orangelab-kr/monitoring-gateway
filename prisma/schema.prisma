@@ -18,17 +18,17 @@ model MonitorModel {
   alarms  AlarmModel[]
 
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model MetricsModel {
   metricsId String @id @default(uuid())
 
   monitorId String
-  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId])
+  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId], onDelete: Cascade)
 
-  metricsData Json
+  metricsData Json?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -40,15 +40,14 @@ model RuleModel {
 
   ruleName String
 
-  unitTime    Int? // 발생 시간
-  count       Int? // 발생 횟수
-  gracePeriod Int? // 유예 시간
+  unitTime    Int // 발생 시간
+  count       Int // 발생 횟수
+  gracePeriod Int // 유예 시간
 
   alarms AlarmModel[]
 
   monitorId String
-  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId])
-
+  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId], onDelete: Cascade)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -56,13 +55,13 @@ model RuleModel {
 }
 
 model AlarmModel {
-  alarmId String @id
+  alarmId String @id @default(uuid())
 
   monitorId String
-  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId])
+  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId], onDelete: Cascade)
 
   ruleId String
-  rule   RuleModel @relation(fields: [ruleId], references: [ruleId])
+  rule   RuleModel @relation(fields: [ruleId], references: [ruleId], onDelete: Cascade)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

@@ -10,7 +10,7 @@ function createPrismaClient(): PrismaClient {
   const prisma = new PrismaClient();
 
   prisma.$use(async (params, next) => {
-    const bypassSoftDeleted: string[] = ['PermissionModel'];
+    const bypassSoftDeleted: string[] = ['MonitorModel'];
     if (params.model && !bypassSoftDeleted.includes(params.model)) {
       if (!['create', 'update', 'upsert', 'delete'].includes(params.action)) {
         if (!params.args.where) params.args.where = {};
