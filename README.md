@@ -1,1 +1,1 @@
-# TypeScript Template
+# Monitoring Gateway

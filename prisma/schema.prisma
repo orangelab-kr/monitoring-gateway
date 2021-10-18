@@ -1,0 +1,70 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model MonitorModel {
+  monitorId String @id
+
+  monitorName String
+  description String @default("")
+
+  metrics MetricsModel[]
+  rules   RuleModel[]
+  alarms  AlarmModel[]
+
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model MetricsModel {
+  metricsId String @id @default(uuid())
+
+  monitorId String
+  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId])
+
+  metricsData Json
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model RuleModel {
+  ruleId String @id @default(uuid())
+
+  ruleName String
+
+  unitTime    Int? // 발생 시간
+  count       Int? // 발생 횟수
+  gracePeriod Int? // 유예 시간
+
+  alarms AlarmModel[]
+
+  monitorId String
+  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId])
+
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model AlarmModel {
+  alarmId String @id
+
+  monitorId String
+  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId])
+
+  ruleId String
+  rule   RuleModel @relation(fields: [ruleId], references: [ruleId])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
