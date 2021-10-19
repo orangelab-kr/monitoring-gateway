@@ -1,7 +1,7 @@
 import { MetricsModel, MonitorModel, Prisma, RuleModel } from '@prisma/client';
 import dayjs from 'dayjs';
-import _ from 'lodash';
-import { $$$, Alarm, Joi, prisma } from '..';
+import _, { filter } from 'lodash';
+import { $$$, Alarm, Joi, prisma, RESULT } from '..';
 
 export class Rule {
   public static async createRule(
@@ -35,6 +35,23 @@ export class Rule {
           count,
         },
       });
+  }
+
+  public static async getRule(
+    monitor: MonitorModel,
+    ruleId: string
+  ): Promise<() => Prisma.Prisma__RuleModelClient<RuleModel | null>> {
+    const { monitorId } = monitor;
+    return () => prisma.ruleModel.findFirst({ where: { monitorId, ruleId } });
+  }
+
+  public static async getRuleOrThrow(
+    monitor: MonitorModel,
+    ruleId: string
+  ): Promise<RuleModel> {
+    const rule = await $$$(Rule.getRule(monitor, ruleId));
+    if (!rule) throw RESULT.CANNOT_FIND_RULE();
+    return rule;
   }
 
   public static async modifyRule(

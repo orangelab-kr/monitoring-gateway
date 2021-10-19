@@ -6,7 +6,7 @@ import {
   Prisma,
   RuleModel,
 } from '@prisma/client';
-import { Joi, prisma, SlackAction } from '../..';
+import { $$$, Joi, prisma, RESULT, SlackAction } from '../..';
 
 export * from './slack';
 
@@ -45,19 +45,20 @@ export class Action {
     await Promise.all([
       actions
         .map((a) => Action.getActionInterface(a.provider, a.payload))
-        .map((a) => Action.actionHandler(a.executeAction, input))
-        .map((action) => action()),
+        .map((action) => Action.actionHandler(action, input)()),
     ]);
   }
 
   public static actionHandler(
-    executeAction: (props: ActionExecuteInput) => Promise<void>,
+    action: ActionInterface,
     props: ActionExecuteInput
   ): () => Promise<void> {
     return async () => {
       try {
-        await executeAction(props);
-      } catch (err) {}
+        await action.executeAction(props);
+      } catch (err) {
+        console.log(err);
+      }
     };
   }
 
@@ -84,6 +85,49 @@ export class Action {
       prisma.actionModel.create({
         data: { actionName, description, provider, payload, ruleId },
       });
+  }
+
+  public static async modifyAction(
+    action: ActionModel,
+    props: {
+      actionName?: string;
+      description?: string;
+      provider?: ActionProvider;
+      payload?: any;
+    }
+  ): Promise<() => Prisma.Prisma__ActionModelClient<ActionModel>> {
+    const { actionId } = action;
+    const { actionName, description, provider, payload } = await Joi.object({
+      actionName: Joi.string().min(2).max(32).optional(),
+      description: Joi.string().allow('').allow(null).optional(),
+      provider: Joi.string()
+        .valid(...Object.keys(ActionProvider))
+        .optional(),
+      payload: Joi.any().optional(),
+    }).validateAsync(props);
+    await Action.getActionInterface(provider, payload).validatePayload();
+    return () =>
+      prisma.actionModel.update({
+        where: { actionId },
+        data: { actionName, description, provider, payload },
+      });
+  }
+
+  public static async getAction(
+    rule: RuleModel,
+    actionId: string
+  ): Promise<() => Prisma.Prisma__ActionModelClient<ActionModel | null>> {
+    const { ruleId } = rule;
+    return () => prisma.actionModel.findFirst({ where: { ruleId, actionId } });
+  }
+
+  public static async getActionOrThrow(
+    rule: RuleModel,
+    actionId: string
+  ): Promise<ActionModel> {
+    const action = await $$$(Action.getAction(rule, actionId));
+    if (!action) throw RESULT.CANNOT_FIND_ACTION();
+    return action;
   }
 
   public static async getActions(
@@ -123,5 +167,12 @@ export class Action {
     ]);
 
     return { total, actions };
+  }
+
+  public static async deleteAction(
+    action: ActionModel
+  ): Promise<() => Prisma.Prisma__ActionModelClient<ActionModel>> {
+    const { actionId } = action;
+    return () => prisma.actionModel.delete({ where: { actionId } });
   }
 }

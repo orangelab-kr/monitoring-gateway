@@ -72,8 +72,8 @@ model AlarmModel {
 }
 
 enum ActionProvider {
-  Webhook
-  Slack
+  webhook
+  slack
 }
 
 model ActionModel {
