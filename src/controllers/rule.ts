@@ -1,5 +1,6 @@
-import { MonitorModel, Prisma, RuleModel } from '@prisma/client';
+import { MetricsModel, MonitorModel, Prisma, RuleModel } from '@prisma/client';
 import dayjs from 'dayjs';
+import _ from 'lodash';
 import { $$$, Alarm, Joi, prisma } from '..';
 
 export class Rule {
@@ -7,23 +8,27 @@ export class Rule {
     monitor: MonitorModel,
     props: {
       ruleName: string;
+      baseKey: string;
       unitTime: number;
       gracePeriod: number;
       count: number;
     }
   ): Promise<() => Prisma.Prisma__RuleModelClient<RuleModel>> {
     const { monitorId } = monitor;
-    const { ruleName, unitTime, gracePeriod, count } = await Joi.object({
-      ruleName: Joi.string().min(2).max(16).required(),
-      unitTime: Joi.number().required(),
-      gracePeriod: Joi.number().required(),
-      count: Joi.number().required(),
-    }).validateAsync(props);
+    const { ruleName, baseKey, unitTime, gracePeriod, count } =
+      await Joi.object({
+        ruleName: Joi.string().min(2).max(16).required(),
+        baseKey: Joi.string().required(),
+        unitTime: Joi.number().required(),
+        gracePeriod: Joi.number().required(),
+        count: Joi.number().required(),
+      }).validateAsync(props);
 
     return () =>
       prisma.ruleModel.create({
         data: {
           monitorId,
+          baseKey,
           ruleName,
           unitTime,
           gracePeriod,
@@ -36,24 +41,28 @@ export class Rule {
     rule: RuleModel,
     props: {
       ruleName?: string;
+      baseKey?: string;
       unitTime?: number;
       gracePeriod?: number;
       count?: number;
     }
   ): Promise<() => Prisma.Prisma__RuleModelClient<RuleModel>> {
     const { ruleId } = rule;
-    const { ruleName, unitTime, gracePeriod, count } = await Joi.object({
-      ruleName: Joi.string().min(2).max(16).optional(),
-      unitTime: Joi.number().optional(),
-      gracePeriod: Joi.number().optional(),
-      count: Joi.number().optional(),
-    }).validateAsync(props);
+    const { ruleName, baseKey, unitTime, gracePeriod, count } =
+      await Joi.object({
+        ruleName: Joi.string().min(2).max(16).optional(),
+        baseKey: Joi.string().optional(),
+        unitTime: Joi.number().optional(),
+        gracePeriod: Joi.number().optional(),
+        count: Joi.number().optional(),
+      }).validateAsync(props);
 
     return () =>
       prisma.ruleModel.update({
         where: { ruleId },
         data: {
           ruleName,
+          baseKey,
           unitTime,
           gracePeriod,
           count,
@@ -66,7 +75,7 @@ export class Rule {
     props: {
       take?: number;
       skip?: number;
-      orderByField?: 'ruleName' | 'createdAt' | 'updatedAt';
+      orderByField?: 'ruleName' | 'baseKey' | 'createdAt' | 'updatedAt';
       orderBySort?: 'asc' | 'desc';
       search?: string;
     }
@@ -92,7 +101,10 @@ export class Rule {
     return { total, rules };
   }
 
-  public static async executeRules(monitor: MonitorModel): Promise<void> {
+  public static async executeRules(
+    monitor: MonitorModel,
+    metrics: MetricsModel
+  ): Promise<void> {
     const { monitorId } = monitor;
     const rules = await prisma.ruleModel.findMany({ where: { monitorId } });
     if (rules.length <= 0) return;
@@ -102,19 +114,20 @@ export class Rule {
     const rawMetrics = await prisma.metricsModel.findMany({
       orderBy: { createdAt: 'desc' },
       where: { createdAt: { gte: maxCreatedAt } },
-      select: { metricsId: true, createdAt: true },
     });
 
     for (const rule of rules) {
+      const { baseKey } = rule;
+      const metricsKey = _.get(metrics.metricsData, baseKey);
       const inGracePeriod = await Rule.isInGracePeriod(monitor, rule);
       if (inGracePeriod) continue;
 
       const createdAt = dayjs().subtract(rule.unitTime, 'ms').toDate();
-      const metrics = rawMetrics.filter(
-        (m) => createdAt.getTime() < m.createdAt.getTime()
-      );
+      const filiteredMetrics = rawMetrics
+        .filter((m) => _.get(m.metricsData, baseKey) === metricsKey)
+        .filter((m) => createdAt.getTime() < m.createdAt.getTime());
 
-      if (metrics.length < rule.count) continue;
+      if (filiteredMetrics.length < rule.count) continue;
       await $$$(Alarm.createAlarm(rule));
     }
   }

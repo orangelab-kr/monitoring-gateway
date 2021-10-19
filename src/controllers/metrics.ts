@@ -7,7 +7,7 @@ export class Metrics {
     metricsData?: any
   ): Promise<MetricsModel> {
     const metrics = await $$$(Metrics.createMetrics(monitor, metricsData));
-    await Rule.executeRules(monitor);
+    await Rule.executeRules(monitor, metrics);
     return metrics;
   }
 

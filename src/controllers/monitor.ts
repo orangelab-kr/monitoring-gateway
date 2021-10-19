@@ -31,7 +31,7 @@ export class Monitor {
     const { monitorId, monitorName, description } = await Joi.object({
       monitorId: Joi.string().alphanum().min(2).max(32).optional(),
       monitorName: Joi.string().min(2).max(16).optional(),
-      description: Joi.string().min(2).max(16).optional(),
+      description: Joi.string().allow('').allow(null).optional(),
     }).validateAsync(props);
     if (monitorId !== monitor.monitorId) {
       const monitor = await $$$(Monitor.getMonitor(monitorId));
