@@ -50,6 +50,8 @@ model RuleModel {
   monitorId String
   monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId], onDelete: Cascade)
 
+  actions ActionModel[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -63,6 +65,28 @@ model AlarmModel {
 
   ruleId String
   rule   RuleModel @relation(fields: [ruleId], references: [ruleId], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+enum ActionProvider {
+  Webhook
+  Slack
+}
+
+model ActionModel {
+  actionId String @id @default(uuid())
+
+  actionName  String
+  description String @default("")
+
+  provider ActionProvider
+  payload  Json
+
+  ruleId String
+  rule   RuleModel? @relation(fields: [ruleId], references: [ruleId], onDelete: Cascade)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

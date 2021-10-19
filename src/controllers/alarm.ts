@@ -1,12 +1,41 @@
-import { AlarmModel, MonitorModel, Prisma, RuleModel } from '@prisma/client';
-import { Joi, prisma } from '..';
+import {
+  AlarmModel,
+  MetricsModel,
+  MonitorModel,
+  Prisma,
+  RuleModel,
+} from '@prisma/client';
+import { $$$, Action, Joi, prisma, RESULT } from '..';
 
 export class Alarm {
   public static async createAlarm(
-    rule: RuleModel
-  ): Promise<() => Prisma.Prisma__AlarmModelClient<AlarmModel>> {
+    rule: RuleModel,
+    metrics: MetricsModel[]
+  ): Promise<AlarmModel> {
     const { ruleId, monitorId } = rule;
-    return () => prisma.alarmModel.create({ data: { ruleId, monitorId } });
+    const alarm = await prisma.alarmModel.create({
+      data: { ruleId, monitorId },
+    });
+
+    await Action.executeActions({ alarm, rule, metrics });
+    return alarm;
+  }
+
+  public static async getAlarm(
+    monitor: MonitorModel,
+    alarmId: string
+  ): Promise<() => Prisma.Prisma__AlarmModelClient<AlarmModel | null>> {
+    const { monitorId } = monitor;
+    return () => prisma.alarmModel.findFirst({ where: { monitorId, alarmId } });
+  }
+
+  public static async getAlarmOrThrow(
+    monitor: MonitorModel,
+    alarmId: string
+  ): Promise<AlarmModel> {
+    const alarm = await $$$(Alarm.getAlarm(monitor, alarmId));
+    if (!alarm) throw RESULT.CANNOT_FIND_ALARM();
+    return alarm;
   }
 
   public static async getAlarms(

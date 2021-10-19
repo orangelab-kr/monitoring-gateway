@@ -128,7 +128,7 @@ export class Rule {
         .filter((m) => createdAt.getTime() < m.createdAt.getTime());
 
       if (filiteredMetrics.length < rule.count) continue;
-      await $$$(Alarm.createAlarm(rule));
+      await Alarm.createAlarm(rule, filiteredMetrics);
     }
   }
 
