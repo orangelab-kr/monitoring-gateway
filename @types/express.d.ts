@@ -11,6 +11,14 @@ import 'express';
 declare global {
   namespace Express {
     interface Request {
+      loggined: {
+        accessKey: AccessKeyModel;
+        monitor: MonitorModel;
+        alarm: AlarmModel;
+        metrics: MetricsModel;
+        rule: RuleModel;
+        action: ActionModel;
+      };
       internal: {
         sub: string;
         iss: string;
