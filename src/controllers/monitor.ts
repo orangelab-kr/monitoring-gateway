@@ -9,7 +9,7 @@ export class Monitor {
   }): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel>> {
     const { monitorId, monitorName, description } = await Joi.object({
       monitorId: Joi.string().alphanum().min(2).max(32).required(),
-      monitorName: Joi.string().min(2).max(16).required(),
+      monitorName: Joi.string().min(2).max(32).required(),
       description: Joi.string().min(2).max(64).optional(),
     }).validateAsync(props);
     const monitor = await $$$(Monitor.getMonitor(monitorId));
@@ -30,7 +30,7 @@ export class Monitor {
   ): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel>> {
     const { monitorId, monitorName, description } = await Joi.object({
       monitorId: Joi.string().alphanum().min(2).max(32).optional(),
-      monitorName: Joi.string().min(2).max(16).optional(),
+      monitorName: Joi.string().min(2).max(32).optional(),
       description: Joi.string().allow('').allow(null).optional(),
     }).validateAsync(props);
     if (monitorId !== monitor.monitorId) {

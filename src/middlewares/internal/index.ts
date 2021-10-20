@@ -51,6 +51,6 @@ export function InternalMiddleware(): WrapperCallback {
       throw RESULT.REQUIRED_ACCESS_KEY();
     }
 
-    await next();
+    next();
   });
 }

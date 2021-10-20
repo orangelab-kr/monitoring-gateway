@@ -17,7 +17,7 @@ export class Rule {
     const { monitorId } = monitor;
     const { ruleName, baseKey, unitTime, gracePeriod, count } =
       await Joi.object({
-        ruleName: Joi.string().min(2).max(16).required(),
+        ruleName: Joi.string().min(2).max(32).required(),
         baseKey: Joi.string().required(),
         unitTime: Joi.number().required(),
         gracePeriod: Joi.number().required(),
@@ -67,7 +67,7 @@ export class Rule {
     const { ruleId } = rule;
     const { ruleName, baseKey, unitTime, gracePeriod, count } =
       await Joi.object({
-        ruleName: Joi.string().min(2).max(16).optional(),
+        ruleName: Joi.string().min(2).max(32).optional(),
         baseKey: Joi.string().optional(),
         unitTime: Joi.number().optional(),
         gracePeriod: Joi.number().optional(),

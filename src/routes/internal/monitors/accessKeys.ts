@@ -25,9 +25,8 @@ export function getInternalMonitorsAccessKeysRouter(): Router {
   router.post(
     '/',
     Wrapper(async (req) => {
-      const accessKey = await AccessKey.createAccessKey(
-        req.internal.monitor,
-        req.body
+      const accessKey = await $$$(
+        AccessKey.createAccessKey(req.internal.monitor, req.body)
       );
 
       throw RESULT.SUCCESS({ details: { accessKey } });

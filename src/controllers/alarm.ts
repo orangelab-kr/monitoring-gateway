@@ -73,7 +73,7 @@ export class Alarm {
       orderBySort: Joi.string().valid('asc', 'desc').default('desc').optional(),
       search: Joi.string().allow(null).allow('').optional(),
     }).validateAsync(props);
-    if (search) where.ruleId = { contains: ruleId };
+    if (search) where.ruleId = { contains: search };
     if (ruleId) where.ruleId = ruleId;
     if (metricsKey) where.metricsKey = metricsKey;
     const orderBy = { [orderByField]: orderBySort };

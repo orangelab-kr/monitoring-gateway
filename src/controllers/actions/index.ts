@@ -103,7 +103,6 @@ export class Action {
         .optional(),
       payload: Joi.any().optional(),
     }).validateAsync(props);
-    await Action.getActionInterface(provider, payload).validatePayload();
     return () =>
       prisma.actionModel.update({
         where: { actionId },
