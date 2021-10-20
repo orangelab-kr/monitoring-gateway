@@ -89,7 +89,7 @@ export class AccessKey {
     monitor: MonitorModel,
     accessKeyId: string
   ): Promise<AccessKeyModel> {
-    const accessKey = $$$(AccessKey.getAccessKey(monitor, accessKeyId));
+    const accessKey = await $$$(AccessKey.getAccessKey(monitor, accessKeyId));
     if (!accessKey) throw RESULT.CANNOT_FIND_MONITOR();
     return accessKey;
   }
