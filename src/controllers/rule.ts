@@ -1,6 +1,6 @@
 import { MetricsModel, MonitorModel, Prisma, RuleModel } from '@prisma/client';
 import dayjs from 'dayjs';
-import _, { filter } from 'lodash';
+import _ from 'lodash';
 import { $$$, Alarm, Joi, prisma, RESULT } from '..';
 
 export class Rule {
@@ -136,7 +136,12 @@ export class Rule {
     for (const rule of rules) {
       const { baseKey } = rule;
       const metricsKey = _.get(metrics.metricsData, baseKey);
-      const inGracePeriod = await Rule.isInGracePeriod(monitor, rule);
+      const inGracePeriod = await Rule.isInGracePeriod({
+        monitor,
+        rule,
+        metricsKey,
+      });
+
       if (inGracePeriod) continue;
 
       const createdAt = dayjs().subtract(rule.unitTime, 'ms').toDate();
@@ -145,15 +150,17 @@ export class Rule {
         .filter((m) => createdAt.getTime() < m.createdAt.getTime());
 
       if (filiteredMetrics.length < rule.count) continue;
-      await Alarm.createAlarm(rule, filiteredMetrics);
+      await Alarm.createAlarm(rule, metricsKey, filiteredMetrics);
     }
   }
 
-  private static async isInGracePeriod(
-    monitor: MonitorModel,
-    rule: RuleModel
-  ): Promise<boolean> {
-    const alarm = await Alarm.getLatestAlarmFromRule(monitor, rule);
+  private static async isInGracePeriod(props: {
+    monitor: MonitorModel;
+    rule: RuleModel;
+    metricsKey: string;
+  }): Promise<boolean> {
+    const { rule } = props;
+    const alarm = await Alarm.getLatestAlarmFromRule(props);
     if (!alarm) return false;
 
     const createdAt = dayjs(alarm.createdAt);
