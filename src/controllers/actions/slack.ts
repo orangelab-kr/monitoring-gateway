@@ -13,15 +13,13 @@ export class SlackAction implements ActionInterface {
 
   constructor(private payload: SlackActionPayload) {}
 
-  public async validatePayload(): Promise<void> {
-    await Joi.object({
+  public async executeAction(props: ActionExecuteInput): Promise<void> {
+    const payload = await this.getRenderedPayload(props);
+    const { url, args } = await Joi.object({
       url: Joi.string().required(),
       args: Joi.any().required(),
-    }).validateAsync(this.payload);
-  }
+    }).validateAsync(payload);
 
-  public async executeAction(props: ActionExecuteInput): Promise<void> {
-    const { url, args } = await this.getRenderedPayload(props);
     await new IncomingWebhook(url).send(args);
   }
 

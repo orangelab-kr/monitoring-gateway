@@ -21,7 +21,6 @@ export type ActionExecuteInput = {
 };
 
 export interface ActionInterface {
-  validatePayload(): Promise<void>;
   executeAction(props: ActionExecuteInput): Promise<void>;
 }
 
@@ -80,7 +79,6 @@ export class Action {
         .required(),
       payload: Joi.any().required(),
     }).validateAsync(props);
-    await Action.getActionInterface(provider, payload).validatePayload();
     return () =>
       prisma.actionModel.create({
         data: { actionName, description, provider, payload, ruleId },

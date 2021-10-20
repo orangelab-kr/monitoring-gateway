@@ -10,8 +10,8 @@ generator client {
 model MonitorModel {
   monitorId String @id
 
-  monitorName String
-  description String @default("")
+  monitorName String @db.Text
+  description String @default("") @db.Text
 
   metrics MetricsModel[]
   rules   RuleModel[]
@@ -38,9 +38,9 @@ model MetricsModel {
 model RuleModel {
   ruleId String @id @default(uuid())
 
-  ruleName String
+  ruleName String  @db.Text
 
-  baseKey     String
+  baseKey     String  @db.Text
   unitTime    Int // 발생 시간
   count       Int // 발생 횟수
   gracePeriod Int // 유예 시간
@@ -66,6 +66,8 @@ model AlarmModel {
   ruleId String
   rule   RuleModel @relation(fields: [ruleId], references: [ruleId], onDelete: Cascade)
 
+  metricsKey String @db.Text
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -79,11 +81,11 @@ enum ActionProvider {
 model ActionModel {
   actionId String @id @default(uuid())
 
-  actionName  String
-  description String @default("")
+  actionName  String @db.Text
+  description String @default("") @db.Text
 
   provider ActionProvider
-  payload  Json
+  payload  String @db.Text
 
   ruleId String
   rule   RuleModel? @relation(fields: [ruleId], references: [ruleId], onDelete: Cascade)
