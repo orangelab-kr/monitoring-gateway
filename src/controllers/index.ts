@@ -1,3 +1,4 @@
+export * from './accessKey';
 export * from './actions';
 export * from './alarm';
 export * from './metrics';

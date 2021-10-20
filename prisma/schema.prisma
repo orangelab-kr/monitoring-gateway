@@ -13,10 +13,10 @@ model MonitorModel {
   monitorName String @db.Text
   description String @default("") @db.Text
 
-  metrics MetricsModel[]
-  rules   RuleModel[]
-  alarms  AlarmModel[]
-
+  metrics    MetricsModel[]
+  rules      RuleModel[]
+  alarms     AlarmModel[]
+  accessKeys AccessKeyModel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -38,9 +38,9 @@ model MetricsModel {
 model RuleModel {
   ruleId String @id @default(uuid())
 
-  ruleName String  @db.Text
+  ruleName String @db.Text
 
-  baseKey     String  @db.Text
+  baseKey     String @db.Text
   unitTime    Int // 발생 시간
   count       Int // 발생 횟수
   gracePeriod Int // 유예 시간
@@ -85,10 +85,24 @@ model ActionModel {
   description String @default("") @db.Text
 
   provider ActionProvider
-  payload  String @db.Text
+  payload  String         @db.Text
 
   ruleId String
   rule   RuleModel? @relation(fields: [ruleId], references: [ruleId], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model AccessKeyModel {
+  accessKeyId String @id @default(uuid())
+
+  accessKeyName String @db.Text
+  description   String @default("") @db.Text
+
+  monitorId String
+  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId], onDelete: Cascade)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

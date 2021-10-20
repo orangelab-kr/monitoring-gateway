@@ -1,4 +1,5 @@
 import {
+  AccessKeyModel,
   ActionModel,
   AlarmModel,
   MetricsModel,
@@ -22,6 +23,7 @@ declare global {
         metrics: MetricsModel;
         rule: RuleModel;
         action: ActionModel;
+        accessKey: AccessKeyModel;
       };
     }
   }

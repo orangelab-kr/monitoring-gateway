@@ -1,5 +1,6 @@
 import { Monitor, RESULT, Wrapper, WrapperCallback } from '../../..';
 
+export * from './accessKey';
 export * from './alarm';
 export * from './metrics';
 export * from './rule';

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   $$$,
+  getInternalMonitorsAccessKeysRouter,
   getInternalMonitorsAlarmsRouter,
   getInternalMonitorsMetricsRouter,
   getInternalMonitorsRulesRouter,
@@ -10,6 +11,7 @@ import {
   Wrapper,
 } from '../../..';
 
+export * from './accessKeys';
 export * from './alarms';
 export * from './metrics';
 export * from './rules';
@@ -27,6 +29,12 @@ export function getInternalMonitorsRouter(): Router {
     '/:monitorId/metrics',
     InternalMonitorMiddleware(),
     getInternalMonitorsMetricsRouter()
+  );
+
+  router.use(
+    '/:monitorId/accessKeys',
+    InternalMonitorMiddleware(),
+    getInternalMonitorsAccessKeysRouter()
   );
 
   router.use(
