@@ -5,7 +5,7 @@ import {
   Prisma,
   RuleModel,
 } from '@prisma/client';
-import { $$$, Action, Joi, prisma, RESULT } from '..';
+import { $$$, $PQ, Action, Joi, prisma, RESULT } from '..';
 
 export class Alarm {
   public static async createAlarm(
@@ -20,6 +20,22 @@ export class Alarm {
 
     await Action.executeActions({ alarm, rule, metrics });
     return alarm;
+  }
+
+  public static async modifyAlarm(
+    alarm: AlarmModel,
+    props: { resolvedAt?: Date }
+  ): Promise<() => Prisma.Prisma__AlarmModelClient<AlarmModel>> {
+    const { alarmId } = alarm;
+    const { resolvedAt } = await Joi.object({
+      resolvedAt: Joi.date().allow(null).optional(),
+    }).validateAsync(props);
+
+    return () =>
+      prisma.alarmModel.update({
+        where: { alarmId },
+        data: { resolvedAt },
+      });
   }
 
   public static async getAlarm(
@@ -46,6 +62,7 @@ export class Alarm {
       skip?: number;
       ruleId?: string;
       metricsKey?: string;
+      showResolved?: boolean;
       orderByField?: 'ruleName' | 'createdAt' | 'updatedAt';
       orderBySort?: 'asc' | 'desc';
       search?: string;
@@ -58,6 +75,7 @@ export class Alarm {
       skip,
       ruleId,
       metricsKey,
+      showResolved,
       orderByField,
       orderBySort,
       search,
@@ -66,6 +84,7 @@ export class Alarm {
       skip: Joi.number().default(0).optional(),
       ruleId: Joi.string().uuid().optional(),
       metricsKey: Joi.string().optional(),
+      showResolved: Joi.boolean().default(false).optional(),
       orderByField: Joi.string()
         .valid('ruleName', 'createdAt', 'updatedAt')
         .default('createdAt')
@@ -76,6 +95,7 @@ export class Alarm {
     if (search) where.ruleId = { contains: search };
     if (ruleId) where.ruleId = ruleId;
     if (metricsKey) where.metricsKey = metricsKey;
+    if (!showResolved) where.resolvedAt = null;
     const orderBy = { [orderByField]: orderBySort };
     const [total, alarms] = await prisma.$transaction([
       prisma.alarmModel.count({ where }),
@@ -102,5 +122,12 @@ export class Alarm {
 
     if (alarms.length <= 0) return null;
     return alarms[0];
+  }
+
+  public static async deleteAlarm(
+    alarm: AlarmModel
+  ): Promise<() => Prisma.Prisma__AlarmModelClient<AlarmModel>> {
+    const { alarmId } = alarm;
+    return () => prisma.alarmModel.delete({ where: { alarmId } });
   }
 }

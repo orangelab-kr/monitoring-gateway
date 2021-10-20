@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  $$$,
   Alarm,
   InternalMonitorAlarmMiddleware,
   RESULT,
@@ -24,6 +25,25 @@ export function getInternalMonitorsAlarmsRouter(): Router {
     Wrapper(async (req) => {
       const { alarm } = req.internal;
       throw RESULT.SUCCESS({ details: { alarm } });
+    })
+  );
+
+  router.post(
+    '/:alarmId',
+    InternalMonitorAlarmMiddleware(),
+    Wrapper(async (req) => {
+      const alarm = await $$$(Alarm.modifyAlarm(req.internal.alarm, req.body));
+      throw RESULT.SUCCESS({ details: { alarm } });
+    })
+  );
+
+  router.delete(
+    '/:alarmId',
+    InternalMonitorAlarmMiddleware(),
+    Wrapper(async (req) => {
+      const { alarm } = req.internal;
+      await $$$(Alarm.deleteAlarm(alarm));
+      throw RESULT.SUCCESS();
     })
   );
 
