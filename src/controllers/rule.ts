@@ -143,7 +143,6 @@ export class Rule {
       });
 
       if (inGracePeriod) continue;
-
       const createdAt = dayjs().subtract(rule.unitTime, 'ms').toDate();
       const filiteredMetrics = rawMetrics
         .filter((m) => _.get(m.metricsData, baseKey) === metricsKey)

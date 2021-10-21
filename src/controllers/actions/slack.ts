@@ -26,6 +26,6 @@ export class SlackAction implements ActionInterface {
   private async getRenderedPayload(scope: any): Promise<SlackActionPayload> {
     const rawPayload = JSON.stringify(this.payload);
     const renderedPayload = await this.liquid.parseAndRender(rawPayload, scope);
-    return <SlackActionPayload>JSON.parse(renderedPayload);
+    return <SlackActionPayload>JSON.parse(JSON.parse(renderedPayload));
   }
 }

@@ -6,7 +6,7 @@ import {
   Prisma,
   RuleModel,
 } from '@prisma/client';
-import { $$$, Joi, prisma, RESULT, SlackAction } from '../..';
+import { $$$, clusterInfo, Joi, prisma, RESULT, SlackAction } from '../..';
 
 export * from './slack';
 
@@ -18,6 +18,14 @@ export type ActionExecuteInput = {
   alarm: AlarmModel;
   rule: RuleModel;
   metrics: MetricsModel[];
+  clusterInfo: {
+    name?: string;
+    description?: string;
+    version?: string;
+    mode?: string;
+    author?: string;
+    cluster?: string;
+  };
 };
 
 export interface ActionInterface {
@@ -40,7 +48,7 @@ export class Action {
     const { alarm, rule, metrics } = props;
     const { ruleId } = rule;
     const actions = await prisma.actionModel.findMany({ where: { ruleId } });
-    const input: ActionExecuteInput = { alarm, rule, metrics };
+    const input: ActionExecuteInput = { clusterInfo, alarm, rule, metrics };
     await Promise.all([
       actions
         .map((a) => Action.getActionInterface(a.provider, a.payload))
@@ -55,9 +63,7 @@ export class Action {
     return async () => {
       try {
         await action.executeAction(props);
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     };
   }
 
@@ -77,7 +83,12 @@ export class Action {
       provider: Joi.string()
         .valid(...Object.keys(ActionProvider))
         .required(),
-      payload: Joi.any().required(),
+      payload: [
+        Joi.string().required(),
+        Joi.object()
+          .custom(<any>JSON.stringify)
+          .required(),
+      ],
     }).validateAsync(props);
     return () =>
       prisma.actionModel.create({
