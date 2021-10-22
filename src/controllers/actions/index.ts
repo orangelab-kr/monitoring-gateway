@@ -7,8 +7,10 @@ import {
   RuleModel,
 } from '@prisma/client';
 import * as Sentry from '@sentry/node';
+import { Alarm } from '../..';
 import {
   $$$,
+  $PQ,
   clusterInfo,
   Joi,
   logger,
@@ -59,9 +61,9 @@ export class Action {
   }): Promise<void> {
     const { alarm, rule, metrics, metricsKey } = props;
     const { ruleId } = rule;
-    const [actions, alarmCount] = await prisma.$transaction([
-      prisma.actionModel.findMany({ where: { ruleId } }),
-      prisma.alarmModel.count({ where: { ruleId, metricsKey } }),
+    const [actions, alarmCount]: [ActionModel[], number] = await $$$([
+      $PQ(prisma.actionModel.findMany({ where: { ruleId } })),
+      Alarm.getUnresolvedAlarmCount(rule, metricsKey),
     ]);
 
     const input: ActionExecuteInput = {

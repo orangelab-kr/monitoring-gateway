@@ -12,16 +12,18 @@ export class Rule {
       unitTime: number;
       gracePeriod: number;
       count: number;
+      autoResolve?: number;
     }
   ): Promise<() => Prisma.Prisma__RuleModelClient<RuleModel>> {
     const { monitorId } = monitor;
-    const { ruleName, baseKey, unitTime, gracePeriod, count } =
+    const { ruleName, baseKey, unitTime, gracePeriod, count, autoResolve } =
       await Joi.object({
         ruleName: Joi.string().min(2).max(32).required(),
         baseKey: Joi.string().required(),
         unitTime: Joi.number().required(),
         gracePeriod: Joi.number().required(),
         count: Joi.number().required(),
+        autoResolve: Joi.number().allow(null).optional(),
       }).validateAsync(props);
 
     return () =>
@@ -33,6 +35,7 @@ export class Rule {
           unitTime,
           gracePeriod,
           count,
+          autoResolve,
         },
       });
   }
@@ -62,16 +65,18 @@ export class Rule {
       unitTime?: number;
       gracePeriod?: number;
       count?: number;
+      autoResolve?: number;
     }
   ): Promise<() => Prisma.Prisma__RuleModelClient<RuleModel>> {
     const { ruleId } = rule;
-    const { ruleName, baseKey, unitTime, gracePeriod, count } =
+    const { ruleName, baseKey, unitTime, gracePeriod, count, autoResolve } =
       await Joi.object({
         ruleName: Joi.string().min(2).max(32).optional(),
         baseKey: Joi.string().optional(),
         unitTime: Joi.number().optional(),
         gracePeriod: Joi.number().optional(),
         count: Joi.number().optional(),
+        autoResolve: Joi.number().allow(null).optional(),
       }).validateAsync(props);
 
     return () =>
@@ -83,6 +88,7 @@ export class Rule {
           unitTime,
           gracePeriod,
           count,
+          autoResolve,
         },
       });
   }

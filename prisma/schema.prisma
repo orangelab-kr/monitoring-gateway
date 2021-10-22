@@ -44,6 +44,7 @@ model RuleModel {
   unitTime    Int // 발생 시간
   count       Int // 발생 횟수
   gracePeriod Int // 유예 시간
+  autoResolve Int? // 자동 해결
 
   alarms AlarmModel[]
 

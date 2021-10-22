@@ -3,9 +3,11 @@ import {
   MetricsModel,
   MonitorModel,
   Prisma,
+  PrismaPromise,
   RuleModel,
 } from '@prisma/client';
-import { $$$, $PQ, Action, Joi, prisma, RESULT } from '..';
+import dayjs from 'dayjs';
+import { $$$, Action, Joi, prisma, RESULT } from '..';
 
 export class Alarm {
   public static async createAlarm(
@@ -18,8 +20,36 @@ export class Alarm {
       data: { ruleId, monitorId, metricsKey },
     });
 
+    await Alarm.resolveAlarmByAutoResolve(rule);
     await Action.executeActions({ alarm, rule, metrics, metricsKey });
     return alarm;
+  }
+
+  public static async getUnresolvedAlarmCount(
+    rule: RuleModel,
+    metricsKey: string
+  ): Promise<() => PrismaPromise<number>> {
+    const { ruleId } = rule;
+    return () =>
+      prisma.alarmModel.count({
+        where: { ruleId, metricsKey, resolvedAt: null },
+      });
+  }
+
+  public static async resolveAlarmByAutoResolve(
+    rule: RuleModel
+  ): Promise<void> {
+    const { ruleId, autoResolve } = rule;
+    if (autoResolve === null) return;
+    const createdAt = dayjs().subtract(autoResolve, 'ms').toDate();
+    await prisma.alarmModel.updateMany({
+      data: { resolvedAt: new Date() },
+      where: {
+        ruleId,
+        resolvedAt: null,
+        createdAt: { lte: createdAt },
+      },
+    });
   }
 
   public static async modifyAlarm(
