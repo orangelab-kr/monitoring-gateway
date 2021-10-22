@@ -6,7 +6,16 @@ import {
   Prisma,
   RuleModel,
 } from '@prisma/client';
-import { $$$, clusterInfo, Joi, prisma, RESULT, SlackAction } from '../..';
+import * as Sentry from '@sentry/node';
+import {
+  $$$,
+  clusterInfo,
+  Joi,
+  logger,
+  prisma,
+  RESULT,
+  SlackAction,
+} from '../..';
 
 export * from './slack';
 
@@ -63,7 +72,13 @@ export class Action {
     return async () => {
       try {
         await action.executeAction(props);
-      } catch (err) {}
+      } catch (err: any) {
+        Sentry.captureException(err);
+        if (process.env.NODE_ENV !== 'prod') {
+          logger.error(`Action / 액션을 실행할 수 없습니다. ${err.message}`);
+          logger.error(err.stack);
+        }
+      }
     };
   }
 
