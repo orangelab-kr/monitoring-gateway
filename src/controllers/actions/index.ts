@@ -24,9 +24,11 @@ export interface ActionConstructor {
 }
 
 export type ActionExecuteInput = {
-  alarm: AlarmModel;
-  rule: RuleModel;
+  metricsKey: string;
   metrics: MetricsModel[];
+  alarm: AlarmModel;
+  alarmCount: number;
+  rule: RuleModel;
   clusterInfo: {
     name?: string;
     description?: string;
@@ -50,14 +52,27 @@ export class Action {
   }
 
   public static async executeActions(props: {
+    metricsKey: string;
+    metrics: MetricsModel[];
     alarm: AlarmModel;
     rule: RuleModel;
-    metrics: MetricsModel[];
   }): Promise<void> {
-    const { alarm, rule, metrics } = props;
+    const { alarm, rule, metrics, metricsKey } = props;
     const { ruleId } = rule;
-    const actions = await prisma.actionModel.findMany({ where: { ruleId } });
-    const input: ActionExecuteInput = { clusterInfo, alarm, rule, metrics };
+    const [actions, alarmCount] = await prisma.$transaction([
+      prisma.actionModel.findMany({ where: { ruleId } }),
+      prisma.alarmModel.count({ where: { ruleId, metricsKey } }),
+    ]);
+
+    const input: ActionExecuteInput = {
+      metricsKey,
+      metrics,
+      alarm,
+      alarmCount,
+      rule,
+      clusterInfo,
+    };
+
     await Promise.all([
       actions
         .map((a) => Action.getActionInterface(a.provider, a.payload))

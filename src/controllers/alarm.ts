@@ -18,7 +18,7 @@ export class Alarm {
       data: { ruleId, monitorId, metricsKey },
     });
 
-    await Action.executeActions({ alarm, rule, metrics });
+    await Action.executeActions({ alarm, rule, metrics, metricsKey });
     return alarm;
   }
 
