@@ -6,17 +6,19 @@ export class Monitor {
     monitorId: string;
     monitorName: string;
     description?: string;
+    ttl?: number;
   }): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel>> {
-    const { monitorId, monitorName, description } = await Joi.object({
+    const { monitorId, monitorName, description, ttl } = await Joi.object({
       monitorId: Joi.string().alphanum().min(2).max(32).required(),
       monitorName: Joi.string().min(2).max(32).required(),
       description: Joi.string().min(2).max(64).optional(),
+      ttl: Joi.number().allow(null).optional(),
     }).validateAsync(props);
     const monitor = await $$$(Monitor.getMonitor(monitorId));
     if (monitor) throw RESULT.ALREADY_EXISTS_MONITOR_NAME();
     return () =>
       prisma.monitorModel.create({
-        data: { monitorId, monitorName, description },
+        data: { monitorId, monitorName, description, ttl },
       });
   }
 
@@ -26,12 +28,14 @@ export class Monitor {
       monitorId: string;
       monitorName: string;
       description?: string;
+      ttl?: number;
     }
   ): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel>> {
-    const { monitorId, monitorName, description } = await Joi.object({
+    const { monitorId, monitorName, description, ttl } = await Joi.object({
       monitorId: Joi.string().alphanum().min(2).max(32).optional(),
       monitorName: Joi.string().min(2).max(32).optional(),
       description: Joi.string().allow('').allow(null).optional(),
+      ttl: Joi.number().allow(null).optional(),
     }).validateAsync(props);
     if (monitorId !== monitor.monitorId) {
       const monitor = await $$$(Monitor.getMonitor(monitorId));
@@ -41,7 +45,7 @@ export class Monitor {
     return () =>
       prisma.monitorModel.update({
         where: { monitorId: monitor.monitorId },
-        data: { monitorId, monitorName, description },
+        data: { monitorId, monitorName, description, ttl },
       });
   }
 

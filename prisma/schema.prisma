@@ -17,6 +17,7 @@ model MonitorModel {
   rules      RuleModel[]
   alarms     AlarmModel[]
   accessKeys AccessKeyModel[]
+  ttl        Int? // 데이터 유효기간
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -30,9 +31,8 @@ model MetricsModel {
 
   metricsData Json?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model RuleModel {

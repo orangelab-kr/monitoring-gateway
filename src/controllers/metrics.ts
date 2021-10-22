@@ -1,12 +1,32 @@
-import { MetricsModel, MonitorModel, Prisma } from '@prisma/client';
+import {
+  MetricsModel,
+  MonitorModel,
+  Prisma,
+  PrismaPromise,
+} from '@prisma/client';
+import dayjs from 'dayjs';
 import { $$$, Joi, prisma, RESULT, Rule } from '..';
 
 export class Metrics {
+  public static async deleteMetricsOverTTL(
+    monitor: MonitorModel
+  ): Promise<() => PrismaPromise<Prisma.BatchPayload>> {
+    let createdAt: Prisma.DateTimeFilter | Date = new Date();
+    const { monitorId, ttl } = monitor;
+    if (ttl !== null) createdAt = { lte: dayjs().subtract(ttl, 'ms').toDate() };
+    return () =>
+      prisma.metricsModel.deleteMany({ where: { monitorId, createdAt } });
+  }
+
   public static async createMetricsWithMonitoring(
     monitor: MonitorModel,
     metricsData?: any
   ): Promise<MetricsModel> {
-    const metrics = await $$$(Metrics.createMetrics(monitor, metricsData));
+    const [metrics] = await $$$([
+      Metrics.createMetrics(monitor, metricsData),
+      Metrics.deleteMetricsOverTTL(monitor),
+    ]);
+
     await Rule.executeRules(monitor, metrics);
     return metrics;
   }
