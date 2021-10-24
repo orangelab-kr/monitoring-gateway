@@ -1,0 +1,16 @@
+{
+  "REQUIRED_ACCESS_KEY": "This service requires authentication.",
+  "EXPIRED_ACCESS_KEY": "Your access token has expired.",
+  "PERMISSION_DENIED": "You do not have permission. (%s)",
+  "INVALID_ERROR": "An unknown error has occurred.",
+  "FAILED_VALIDATE": "Please enter the correct information.",
+  "INVALID_API": "Invalid API address.",
+  "CANNOT_FIND_MONITOR": "The monitor does not exist.",
+  "ALREADY_EXISTS_MONITOR_NAME": "A monitor with the same name already exists.",
+  "CANNOT_FIND_METRICS": "The metrics does not exist.",
+  "CANNOT_FIND_ALARM": "The alarm does not exist.",
+  "CANNOT_FIND_RULE": "The rule does not exist.",
+  "CANNOT_FIND_ACTION": "The action does not exist.",
+  "CANNOT_FIND_ACCESS_KEY": "Access key does not exist.",
+  "INVALID_CLIENT_ACCESS_KEY": "The access key is incorrect."
+}

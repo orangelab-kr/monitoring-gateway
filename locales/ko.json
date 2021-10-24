@@ -1,0 +1,16 @@
+{
+  "REQUIRED_ACCESS_KEY": "인증이 필요한 서비스입니다.",
+  "EXPIRED_ACCESS_KEY": "액세스 토큰이 만료되었습니다.",
+  "PERMISSION_DENIED": "권한이 없습니다. (%s)",
+  "INVALID_ERROR": "알 수 없는 오류가 발생하였습니다.",
+  "FAILED_VALIDATE": "올바른 정보를 입력해주세요.",
+  "INVALID_API": "잘못된 API 주소입니다.",
+  "CANNOT_FIND_MONITOR": "모니터가 존재하지 않습니다.",
+  "ALREADY_EXISTS_MONITOR_NAME": "이미 동일한 이름의 모니터가 존재합니다.",
+  "CANNOT_FIND_METRICS": "데이터가 존재하지 않습니다.",
+  "CANNOT_FIND_ALARM": "알람이 존재하지 않습니다.",
+  "CANNOT_FIND_RULE": "규칙이 존재하지 않습니다.",
+  "CANNOT_FIND_ACTION": "액션이 존재하지 않습니다.",
+  "CANNOT_FIND_ACCESS_KEY": "액세스키가 존재하지 않습니다.",
+  "INVALID_CLIENT_ACCESS_KEY": "액세스키가 올바르지 않습니다."
+}
