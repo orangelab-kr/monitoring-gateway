@@ -1,3 +1,4 @@
+export * from './accessKey';
 export * from './internal';
 export * from './logger';
 export * from './monitor';

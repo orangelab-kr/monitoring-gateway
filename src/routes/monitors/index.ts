@@ -28,6 +28,18 @@ export function getMonitorsRouter(): Router {
   );
 
   router.get(
+    '/',
+    Wrapper(async (req) => {
+      const { total, monitors } = await Monitor.getMonitors(
+        req.query,
+        req.loggined.accessKey
+      );
+
+      throw RESULT.SUCCESS({ details: { monitors, total } });
+    })
+  );
+
+  router.get(
     '/:monitorId',
     MonitorMiddleware(),
     Wrapper(async (req) => {

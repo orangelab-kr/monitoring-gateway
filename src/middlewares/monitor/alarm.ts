@@ -8,6 +8,8 @@ export function MonitorAlarmMiddleware(): WrapperCallback {
     } = req;
 
     if (!monitor || !alarmId) throw RESULT.CANNOT_FIND_ALARM();
+
+    if (!req.loggined) req.loggined = <any>{};
     req.loggined.alarm = await Alarm.getAlarmOrThrow(monitor, alarmId);
     next();
   });

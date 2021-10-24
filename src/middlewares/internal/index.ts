@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
 import { Joi, logger, RESULT, Wrapper, WrapperCallback } from '../..';
 
+export * from './accessKey';
 export * from './monitor';
 
 export function InternalMiddleware(): WrapperCallback {

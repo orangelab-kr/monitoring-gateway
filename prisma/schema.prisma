@@ -100,11 +100,9 @@ model ActionModel {
 model AccessKeyModel {
   accessKeyId String @id @default(uuid())
 
-  accessKeyName String @db.Text
-  description   String @default("") @db.Text
-
-  monitorId String
-  monitor   MonitorModel @relation(fields: [monitorId], references: [monitorId], onDelete: Cascade)
+  accessKeyName String         @db.Text
+  description   String         @default("") @db.Text
+  monitors      MonitorModel[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

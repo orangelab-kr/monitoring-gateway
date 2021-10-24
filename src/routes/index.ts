@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  AccessKeyMiddleware,
   clusterInfo,
   getInternalRouter,
   getMonitorsRouter,
@@ -15,7 +16,7 @@ export function getRouter(): Router {
   const router = Router();
 
   router.use('/internal', InternalMiddleware(), getInternalRouter());
-  router.use('/monitors', getMonitorsRouter());
+  router.use('/monitors', AccessKeyMiddleware(), getMonitorsRouter());
 
   router.get(
     '/',

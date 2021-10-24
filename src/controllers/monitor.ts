@@ -1,4 +1,4 @@
-import { MonitorModel, Prisma } from '@prisma/client';
+import { AccessKeyModel, MonitorModel, Prisma } from '@prisma/client';
 import { $$$, Joi, prisma, RESULT } from '..';
 
 export class Monitor {
@@ -49,13 +49,16 @@ export class Monitor {
       });
   }
 
-  public static async getMonitors(props: {
-    take?: number;
-    skip?: number;
-    orderByField?: 'monitorId' | 'monitorName' | 'createdAt' | 'updatedAt';
-    orderBySort?: 'asc' | 'desc';
-    search?: string;
-  }): Promise<{ total: number; monitors: MonitorModel[] }> {
+  public static async getMonitors(
+    props: {
+      take?: number;
+      skip?: number;
+      orderByField?: 'monitorId' | 'monitorName' | 'createdAt' | 'updatedAt';
+      orderBySort?: 'asc' | 'desc';
+      search?: string;
+    },
+    accessKey?: AccessKeyModel
+  ): Promise<{ total: number; monitors: MonitorModel[] }> {
     const where: Prisma.MonitorModelWhereInput = {};
     const { take, skip, orderByField, orderBySort, search } = await Joi.object({
       take: Joi.number().default(10).optional(),
@@ -75,6 +78,11 @@ export class Monitor {
       ];
     }
 
+    if (accessKey) {
+      const { accessKeyId } = accessKey;
+      where.accessKeys = { some: { accessKeyId } };
+    }
+
     const orderBy = { [orderByField]: orderBySort };
     const [total, monitors] = await prisma.$transaction([
       prisma.monitorModel.count({ where }),
@@ -85,13 +93,22 @@ export class Monitor {
   }
 
   public static async getMonitor(
-    monitorId: string
+    monitorId: string,
+    accessKeyId?: string
   ): Promise<() => Prisma.Prisma__MonitorModelClient<MonitorModel | null>> {
-    return () => prisma.monitorModel.findFirst({ where: { monitorId } });
+    const some = { accessKeyId };
+    return () =>
+      prisma.monitorModel.findFirst({
+        where: {
+          monitorId,
+          accessKeys: { some },
+        },
+      });
   }
 
   public static async getMonitorOrThrow(
-    monitorId: string
+    monitorId: string,
+    accessKeyId?: string
   ): Promise<MonitorModel> {
     const monitor = await $$$(Monitor.getMonitor(monitorId));
     if (!monitor) throw RESULT.CANNOT_FIND_MONITOR();
