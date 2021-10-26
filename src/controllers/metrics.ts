@@ -13,7 +13,7 @@ export class Metrics {
   ): Promise<() => PrismaPromise<Prisma.BatchPayload>> {
     let createdAt: Prisma.DateTimeFilter | Date = new Date();
     const { monitorId, ttl } = monitor;
-    if (ttl !== null) createdAt = { lte: dayjs().subtract(ttl, 'ms').toDate() };
+    if (ttl !== null) createdAt = { lte: dayjs().subtract(ttl, 's').toDate() };
     return () =>
       prisma.metricsModel.deleteMany({ where: { monitorId, createdAt } });
   }

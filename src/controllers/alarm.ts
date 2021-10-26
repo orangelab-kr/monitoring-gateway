@@ -41,7 +41,7 @@ export class Alarm {
   ): Promise<void> {
     const { ruleId, autoResolve } = rule;
     if (autoResolve === null) return;
-    const createdAt = dayjs().subtract(autoResolve, 'ms').toDate();
+    const createdAt = dayjs().subtract(autoResolve, 's').toDate();
     await prisma.alarmModel.updateMany({
       data: { resolvedAt: new Date() },
       where: {

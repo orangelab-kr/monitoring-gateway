@@ -133,7 +133,7 @@ export class Rule {
     if (rules.length <= 0) return;
 
     const maxTime = rules.sort((a, b) => b.unitTime - a.unitTime)[0].unitTime;
-    const maxCreatedAt = dayjs().subtract(maxTime, 'ms').toDate();
+    const maxCreatedAt = dayjs().subtract(maxTime, 's').toDate();
     const rawMetrics = await prisma.metricsModel.findMany({
       orderBy: { createdAt: 'desc' },
       where: { createdAt: { gte: maxCreatedAt } },
@@ -149,7 +149,7 @@ export class Rule {
       });
 
       if (inGracePeriod) continue;
-      const createdAt = dayjs().subtract(rule.unitTime, 'ms').toDate();
+      const createdAt = dayjs().subtract(rule.unitTime, 's').toDate();
       const filiteredMetrics = rawMetrics
         .filter((m) => _.get(m.metricsData, baseKey) === metricsKey)
         .filter((m) => createdAt.getTime() < m.createdAt.getTime());
@@ -169,7 +169,7 @@ export class Rule {
     if (!alarm) return false;
 
     const createdAt = dayjs(alarm.createdAt);
-    const afterPeriod = dayjs().subtract(rule.gracePeriod, 'ms');
+    const afterPeriod = dayjs().subtract(rule.gracePeriod, 's');
     return createdAt.isAfter(afterPeriod);
   }
 
