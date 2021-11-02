@@ -7,19 +7,21 @@ import {
   RuleModel,
 } from '@prisma/client';
 import * as Sentry from '@sentry/node';
-import { Alarm } from '../..';
 import {
   $$$,
   $PQ,
+  Alarm,
   clusterInfo,
   Joi,
   logger,
   prisma,
   RESULT,
   SlackAction,
+  WebhookAction,
 } from '../..';
 
 export * from './slack';
+export * from './webhook';
 
 export interface ActionConstructor {
   new (payload: any): ActionInterface;
@@ -50,7 +52,12 @@ export class Action {
     provider: ActionProvider,
     payload: any
   ): ActionInterface {
-    return new SlackAction(payload);
+    switch (provider) {
+      case ActionProvider.slack:
+        return new SlackAction(payload);
+      case ActionProvider.webhook:
+        return new WebhookAction(payload);
+    }
   }
 
   public static async executeActions(props: {

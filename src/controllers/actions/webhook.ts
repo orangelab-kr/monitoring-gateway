@@ -1,30 +1,31 @@
-import { IncomingWebhook, IncomingWebhookSendArguments } from '@slack/webhook';
+import axios, { Method } from 'axios';
 import { Liquid } from 'liquidjs';
 import { ActionExecuteInput, ActionInterface, Joi } from '../..';
 
-export interface SlackActionPayload {
+export interface WebhookActionPayload {
+  method: Method;
   url: string;
-  args: string | IncomingWebhookSendArguments;
+  data: any;
 }
 
-export class SlackAction implements ActionInterface {
+export class WebhookAction implements ActionInterface {
   private liquid = new Liquid();
 
   constructor(private payload: string) {}
 
   public async executeAction(props: ActionExecuteInput): Promise<void> {
     const payload = await this.getRenderedPayload(props);
-    const { url, args } = await Joi.object({
+    const { url, method, data } = await Joi.object({
+      method: Joi.string().required(),
       url: Joi.string().required(),
-      args: Joi.any().required(),
+      data: Joi.any().required(),
     }).validateAsync(payload);
-
-    await new IncomingWebhook(url).send(args);
+    await axios({ url, method, data });
   }
 
-  private async getRenderedPayload(scope: any): Promise<SlackActionPayload> {
+  private async getRenderedPayload(scope: any): Promise<WebhookActionPayload> {
     const { payload } = this;
     const renderedPayload = await this.liquid.parseAndRender(payload, scope);
-    return <SlackActionPayload>JSON.parse(renderedPayload);
+    return <WebhookActionPayload>JSON.parse(renderedPayload);
   }
 }
