@@ -19,6 +19,7 @@ import {
   SlackAction,
   WebhookAction,
 } from '../..';
+import { SlackWithTemplateAction } from './slackWithTemplate';
 
 export * from './slack';
 export * from './webhook';
@@ -55,6 +56,8 @@ export class Action {
     switch (provider) {
       case ActionProvider.slack:
         return new SlackAction(payload);
+      case ActionProvider.slackWithTemplate:
+        return new SlackWithTemplateAction(payload);
       case ActionProvider.webhook:
         return new WebhookAction(payload);
     }

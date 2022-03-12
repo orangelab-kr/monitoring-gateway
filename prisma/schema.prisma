@@ -78,6 +78,7 @@ model AlarmModel {
 enum ActionProvider {
   webhook
   slack
+  slackWithTemplate
 }
 
 model ActionModel {
