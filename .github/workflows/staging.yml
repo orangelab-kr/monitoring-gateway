@@ -9,7 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
@@ -30,11 +29,14 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: monitoring-gateway
         run: |
-          export PACKAGE_VERSION=$(node -p 'require("./package.json").version')-stage
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest-stage -t $ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION
+          export PACKAGE_VERSION=$(node -p 'require("./package.json").version')
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest-stage \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION-stage \
+            --build-arg DOPPLER_TOKEN=${{ secrets.DOPPLER_TOKEN_STAGE }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION-stage
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest-stage
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION"
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION-stage"
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -43,6 +45,7 @@ jobs:
           task-definition: task-definitions/staging.json
           container-name: backend
           image: ${{ steps.build-image.outputs.image }}
+          environment-variables: DOPPLER_TOKEN=${{ secrets.DOPPLER_TOKEN_STAGE }}
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1

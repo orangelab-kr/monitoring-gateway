@@ -9,7 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
@@ -31,7 +30,10 @@ jobs:
           ECR_REPOSITORY: monitoring-gateway
         run: |
           export PACKAGE_VERSION=$(node -p 'require("./package.json").version')
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -t $ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION .
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION \
+            --build-arg DOPPLER_TOKEN=${{ secrets.DOPPLER_TOKEN_PROD }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$PACKAGE_VERSION"
@@ -43,13 +45,14 @@ jobs:
           task-definition: task-definitions/production.json
           container-name: backend
           image: ${{ steps.build-image.outputs.image }}
+          environment-variables: DOPPLER_TOKEN=${{ secrets.DOPPLER_TOKEN_PROD }}
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           wait-for-service-stability: true
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: coreservice-monitoring
+          service: monitoring-gateway
           cluster: production
 
       - name: Logout of Amazon ECR
