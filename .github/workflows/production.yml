@@ -52,7 +52,7 @@ jobs:
         with:
           wait-for-service-stability: true
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: monitoring-gateway
+          service: coreservice-monitoring
           cluster: production
 
       - name: Logout of Amazon ECR
