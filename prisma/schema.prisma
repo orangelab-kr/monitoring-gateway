@@ -4,7 +4,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedIndexes"]
 }
 
 model MonitorModel {
@@ -33,6 +34,8 @@ model MetricsModel {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([createdAt(sort: Desc)])
 }
 
 model RuleModel {
